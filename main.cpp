@@ -448,6 +448,7 @@ SquareMatrix findInverse(SquareMatrix matrix) {
 }
 
 
+// Function that checks if the give transportation problem is balanced
 void validityCheck(const Matrix& s, const Matrix& d) {
     double balance = 0;
     for (int i = 0; i < s.getN(); i++) {
@@ -462,17 +463,23 @@ void validityCheck(const Matrix& s, const Matrix& d) {
 }
 
 
+// Function that implements North-West method
 double northWest(Matrix s, Matrix c, Matrix d) {
     int i = 0, j = 0;
     double result = 0;
     cout << "North - West corner method approximation:\nBasic variables vector: ";
+
+    // Until we do not reach the right-bottom corner
     while (i < c.getN() && j < c.getM()) {
         cout << "(" << i << ", " << j << "); ";
+
+        // If the demand is higher or equal to the supply
         if (d.getElem(0, j) >= s.getElem(i, 0)) {
             result += c.getElem(i, j) * s.getElem(i, 0);
             d.setElem(0, j, d.getElem(0, j) - s.getElem(i, 0));
             i++;
         }
+        // If the supply is higher than the demand
         else {
             result += c.getElem(i, j) * d.getElem(0, j);
             s.setElem(i, 0, s.getElem(i, 0) - d.getElem(0, j));
@@ -484,20 +491,27 @@ double northWest(Matrix s, Matrix c, Matrix d) {
 }
 
 
+// Function that implements Russel's method
 double russel(Matrix s, Matrix c, Matrix d) {
     vector<double> u(s.getN());
     vector<double> v(d.getM());
     double result = 0;
     cout << "Russel's method approximation:\nBasic variables vector:";
+
+    // The cycle stops when there are no rows or columns left
     while (true) {
         fill(u.begin(), u.end(), -1);
         fill(v.begin(), v.end(), -1);
+
+        // Finding the largest values in rows and columns for vetors U and V
         for (int i = 0; i < s.getN(); i++) {
             for (int j = 0; j < d.getM(); j++) {
                 u[i] = max(u[i], c.getElem(i, j));
                 v[j] = max(v[j], c.getElem(i, j));
             }
         }
+
+        // Finding the proper delta to consider
         double delta = -1;
         int deltaI = -1, deltaJ = -1;
         for (int i = 0; i < s.getN(); i++) {
@@ -513,16 +527,21 @@ double russel(Matrix s, Matrix c, Matrix d) {
                 }
             }
         }
+
+        // If no delta found, then we are out of rows and columns
         if (delta == -1) {
             break;
         }
         cout << "(" << deltaI << ", " << deltaJ << "); ";
+
+        // If the demand is higher or equal to the supply 
         if (d.getElem(0, deltaJ) >= s.getElem(deltaI, 0)) {
             result += c.getElem(deltaI, deltaJ) * s.getElem(deltaI, 0);
             for (int j = 0; j < d.getM(); j++) {
                 c.setElem(deltaI, j, -1);
             }
         }
+        // If the supply is higher than the demand
         else {
             result += c.getElem(deltaI, deltaJ) * d.getElem(0, deltaJ);
             for (int i = 0; i < s.getN(); i++) {
