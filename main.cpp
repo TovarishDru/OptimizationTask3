@@ -447,10 +447,24 @@ SquareMatrix findInverse(SquareMatrix matrix) {
 }
 
 
+bool validityCheck(const Matrix& s, const Matrix& d) {
+    double balance = 0;
+    for (int i = 0; i < s.getN(); i++) {
+        balance += s.getElem(i, 0);
+    }
+    for (int j = 0; j < d.getM(); j++) {
+        balance -= d.getElem(0, j);
+    }
+    return balance == 0;
+}
+
+
 double northWest(Matrix s, Matrix c, Matrix d) {
     int i = 0, j = 0;
     double result = 0;
+    cout << "North - West corner method approximation:\nBasic variables vector: ";
     while (i < c.getN() && j < c.getM()) {
+        cout << "(" << i << ", " << j << "); ";
         if (d.getElem(0, j) >= s.getElem(i, 0)) {
             result += c.getElem(i, j) * s.getElem(i, 0);
             d.setElem(0, j, d.getElem(0, j) - s.getElem(i, 0));
@@ -462,6 +476,7 @@ double northWest(Matrix s, Matrix c, Matrix d) {
             j++;
         }
     }
+    cout << "\nSolution: " << result << "\n";
     return result;
 }
 
@@ -473,7 +488,7 @@ int main() {
         Matrix s(1, n), c(n, m), d(1, m);
         cin >> s >> c >> d;
         s = s.transpose();
-        cout << "North-West corner method approximation: " << northWest(s, c, d) << "\n";
+        northWest(s, c, d);
     }
     catch (const exception& ex) {
         cout << ex.what() << "\n";
