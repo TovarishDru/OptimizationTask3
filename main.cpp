@@ -146,6 +146,9 @@ public:
         }
         return this->matrix[i][j];
     }
+    void setElem(int i, int j, double val) {
+        this->matrix[i][j] = val;
+    }
     Matrix() = delete;
     Matrix(int n, int m) {
         this->n = n;
@@ -444,11 +447,48 @@ SquareMatrix findInverse(SquareMatrix matrix) {
 }
 
 
+double northWest(Matrix s, Matrix c, Matrix d) {
+    int i = 0, j = 0;
+    double result = 0;
+    while (i < c.getN() && j < c.getM()) {
+        if (d.getElem(0, j) >= s.getElem(i, 0)) {
+            result += c.getElem(i, j) * s.getElem(i, 0);
+            d.setElem(0, j, d.getElem(0, j) - s.getElem(i, 0));
+            i++;
+        }
+        else {
+            result += c.getElem(i, j) * d.getElem(0, j);
+            s.setElem(i, 0, s.getElem(i, 0) - d.getElem(0, j));
+            j++;
+        }
+    }
+    return result;
+}
+
+
 int main() {
     try {
-        
+        int n, m;
+        cin >> n >> m;
+        Matrix s(1, n), c(n, m), d(1, m);
+        cin >> s >> c >> d;
+        s = s.transpose();
+        cout << "North-West corner method approximation: " << northWest(s, c, d) << "\n";
     }
     catch (const exception& ex) {
         cout << ex.what() << "\n";
     }
 }
+
+
+/*
+Input example:
+
+
+3 5
+140 180 160
+2 3 4 2 4
+8 4 1 4 1
+9 7 3 7 2
+60 70 120 130 100
+*/
