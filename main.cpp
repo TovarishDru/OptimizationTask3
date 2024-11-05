@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include<algorithm>
 using namespace std;
 using ll = long long;
 using ull = unsigned long long;
@@ -447,7 +448,7 @@ SquareMatrix findInverse(SquareMatrix matrix) {
 }
 
 
-bool validityCheck(const Matrix& s, const Matrix& d) {
+void validityCheck(const Matrix& s, const Matrix& d) {
     double balance = 0;
     for (int i = 0; i < s.getN(); i++) {
         balance += s.getElem(i, 0);
@@ -455,7 +456,9 @@ bool validityCheck(const Matrix& s, const Matrix& d) {
     for (int j = 0; j < d.getM(); j++) {
         balance -= d.getElem(0, j);
     }
-    return balance == 0;
+    if (balance != 0) {
+        throw invalid_argument("Error: The problem is not balanced!\n");
+    }
 }
 
 
@@ -481,6 +484,57 @@ double northWest(Matrix s, Matrix c, Matrix d) {
 }
 
 
+double russel(Matrix s, Matrix c, Matrix d) {
+    vector<double> u(s.getN());
+    vector<double> v(d.getM());
+    double result = 0;
+    cout << "Russel's method approximation:\nBasic variables vector:";
+    while (true) {
+        fill(u.begin(), u.end(), -1);
+        fill(v.begin(), v.end(), -1);
+        for (int i = 0; i < s.getN(); i++) {
+            for (int j = 0; j < d.getM(); j++) {
+                u[i] = max(u[i], c.getElem(i, j));
+                v[j] = max(v[j], c.getElem(i, j));
+            }
+        }
+        double delta = -1;
+        int deltaI = -1, deltaJ = -1;
+        for (int i = 0; i < s.getN(); i++) {
+            for (int j = 0; j < d.getM(); j++) {
+                if (u[i] < 0 || v[i] < 0) {
+                    continue;
+                }
+                double tmp = c.getElem(i, j) - (u[i] + v[j]);
+                if (tmp < 0 && abs(tmp) > delta) {
+                    delta = abs(tmp);
+                    deltaI = i;
+                    deltaJ = j;
+                }
+            }
+        }
+        if (delta == -1) {
+            break;
+        }
+        cout << "(" << deltaI << ", " << deltaJ << "); ";
+        if (d.getElem(0, deltaJ) >= s.getElem(deltaI, 0)) {
+            result += c.getElem(deltaI, deltaJ) * s.getElem(deltaI, 0);
+            for (int j = 0; j < d.getM(); j++) {
+                c.setElem(deltaI, j, -1);
+            }
+        }
+        else {
+            result += c.getElem(deltaI, deltaJ) * d.getElem(0, deltaJ);
+            for (int i = 0; i < s.getN(); i++) {
+                c.setElem(i, deltaJ, -1);
+            }
+        }
+    }
+    cout << "\nSolution: " << result << "\n";
+    return result;
+}
+
+
 int main() {
     try {
         int n, m;
@@ -488,7 +542,9 @@ int main() {
         Matrix s(1, n), c(n, m), d(1, m);
         cin >> s >> c >> d;
         s = s.transpose();
+        validityCheck(s, d);
         northWest(s, c, d);
+        russel(s, c, d);
     }
     catch (const exception& ex) {
         cout << ex.what() << "\n";
