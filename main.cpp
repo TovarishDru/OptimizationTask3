@@ -490,6 +490,135 @@ double northWest(Matrix s, Matrix c, Matrix d) {
     return result;
 }
 
+// Function that implements Vogel's method
+double vogel(Matrix S, Matrix C, Matrix D) {
+    int n = C.getN(), m = C.getM();
+    vector<double> rowDifferencies(n), columnDifferencies(m);
+    Matrix ans(n, m);
+    double result = 0;
+    cout << "\nVogel's method approximation: \nInitial solution vector: \n";
+    while (true) {
+        // Calculating row differencies
+        for (int i = 0; i < n; i++) {
+            double minim = 9999, secMinim = 9999;
+            int minimIndex = 9999;
+            double curr_value;
+            // Finding minimum
+            for (int j = 0; j < m; j++) {
+                curr_value = C.getElem(i, j);
+                if (curr_value < minim && curr_value != -1) {
+                    minim = curr_value;
+                    minimIndex = j;
+                }
+            }
+
+            // Finding second minimum
+            for (int j = 0; j < m; j++) {
+                curr_value = C.getElem(i, j);
+                if (curr_value < secMinim && curr_value >= minim && minimIndex != j && curr_value != -1) {
+                    secMinim = curr_value;
+                }
+            }
+            if (secMinim == 9999 && minim == 9999) rowDifferencies[i] = -1;
+            else if (secMinim == 9999) rowDifferencies[i] = minim;
+            else rowDifferencies[i] = secMinim - minim;
+        }
+
+        // Calculating column differencies
+        for (int i = 0; i < m; i++) {
+            double minim = 9999, secMinim = 9999;
+            int minimIndex = 9999;
+            double curr_value;
+            for (int j = 0; j < n; j++) {
+                curr_value = C.getElem(j, i);
+                if (curr_value < minim && curr_value != -1) {
+                    minim = curr_value;
+                    minimIndex = j;
+                }
+            }
+            for (int j = 0; j < n; j++) {
+                curr_value = C.getElem(j, i);
+                if (curr_value < secMinim && curr_value >= minim && minimIndex != j && curr_value != -1) {
+                    secMinim = curr_value;
+                }
+            }
+            if (secMinim == 9999 || minim == 9999) columnDifferencies[i] = -1;
+            else if (secMinim == 9999) columnDifferencies[i] = minim;
+            else columnDifferencies[i] = secMinim - minim;
+        }
+        // Defining maximum value
+        double maxRow = -1, maxColumn = -1;
+        int initialRowIndex = -1, initialColumnIndex = -1;
+        for (int i = 0; i < n; i++) {
+            double value = rowDifferencies[i];
+            if (value > maxRow) {
+                maxRow = value;
+                initialRowIndex = i;
+            }
+        }
+        for (int i = 0; i < m; i++) {
+            double value = columnDifferencies[i];
+            if (value > maxColumn) {
+                maxColumn = value;
+                initialColumnIndex = i;
+            }
+        }
+
+        if (max(maxRow, maxColumn) == -1) {
+            break;
+        }
+
+        int rowIndex, columnIndex;
+        double minValue = 99999999;
+
+        // If row is maximum
+        if (max(maxRow, maxColumn) == maxRow) {
+            rowIndex = initialRowIndex;
+            columnIndex;
+            // Defining min cell
+            for (int i = 0; i < m; i++) {
+                if (C.getElem(rowIndex, i) < minValue && C.getElem(rowIndex, i) != -1) {
+                    minValue = C.getElem(rowIndex, i);
+                    columnIndex = i;
+                }
+            }
+        }
+        // if column is maximum
+        else {
+            rowIndex = -1;
+            columnIndex = initialColumnIndex;
+            // Defining min cell
+            for (int i = 0; i < n; i++) {
+                if (C.getElem(i, columnIndex) < minValue && C.getElem(i, columnIndex) != -1) {
+                    minValue = C.getElem(i, columnIndex);
+                    rowIndex = i;
+                }
+            }
+            
+        }
+        // If demand is over delete column
+        if (D.getElem(0, columnIndex) <= S.getElem(rowIndex, 0)) {
+            ans.setElem(rowIndex, columnIndex, D.getElem(0, columnIndex));
+            result += C.getElem(rowIndex, columnIndex) * D.getElem(0, columnIndex);
+            S.setElem(rowIndex, 0, S.getElem(rowIndex, 0) - D.getElem(0, columnIndex));
+            for (int i = 0; i < n; i++) {
+                C.setElem(i, columnIndex, -1);
+            }
+        }
+        // if supply is over delete row
+        else {
+            ans.setElem(rowIndex, columnIndex, S.getElem(rowIndex, 0));
+            result += C.getElem(rowIndex, columnIndex) * S.getElem(rowIndex, 0);
+            D.setElem(0, columnIndex, D.getElem(0, columnIndex) - S.getElem(rowIndex, 0));
+            for (int i = 0; i < m; i++) {
+                C.setElem(rowIndex, i, -1);
+            }
+        }
+    }
+    cout << ans;
+    cout << "Total distribution cost: " << result;
+    return result;
+}
 
 // Function that implements Russel's method
 double russel(Matrix s, Matrix c, Matrix d) {
@@ -563,6 +692,7 @@ int main() {
         s = s.transpose();
         validityCheck(s, d);
         northWest(s, c, d);
+        vogel(s, c, d);
         russel(s, c, d);
     }
     catch (const exception& ex) {
