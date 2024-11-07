@@ -467,26 +467,29 @@ void validityCheck(const Matrix& s, const Matrix& d) {
 double northWest(Matrix s, Matrix c, Matrix d) {
     int i = 0, j = 0;
     double result = 0;
-    cout << "North - West corner method approximation:\nBasic variables vector: ";
+    Matrix ans(c.getN(), c.getM());
+    cout << "North - West corner method approximation:\nInitial solution matrix: \n";
 
     // Until we do not reach the right-bottom corner
     while (i < c.getN() && j < c.getM()) {
-        cout << "(" << i << ", " << j << "); ";
 
         // If the demand is higher or equal to the supply
         if (d.getElem(0, j) >= s.getElem(i, 0)) {
+            ans.setElem(i, j, s.getElem(i, 0));
             result += c.getElem(i, j) * s.getElem(i, 0);
             d.setElem(0, j, d.getElem(0, j) - s.getElem(i, 0));
             i++;
         }
         // If the supply is higher than the demand
         else {
+            ans.setElem(i, j, d.getElem(0, j));
             result += c.getElem(i, j) * d.getElem(0, j);
             s.setElem(i, 0, s.getElem(i, 0) - d.getElem(0, j));
             j++;
         }
     }
-    cout << "\nSolution: " << result << "\n";
+    cout << ans;
+    cout << "Total distribution cost: " << result << "\n\n";
     return result;
 }
 
@@ -496,7 +499,7 @@ double vogel(Matrix S, Matrix C, Matrix D) {
     vector<double> rowDifferencies(n), columnDifferencies(m);
     Matrix ans(n, m);
     double result = 0;
-    cout << "\nVogel's method approximation: \nInitial solution vector: \n";
+    cout << "Vogel's method approximation: \nInitial solution matrix: \n";
     while (true) {
         // Calculating row differencies
         for (int i = 0; i < n; i++) {
@@ -594,7 +597,7 @@ double vogel(Matrix S, Matrix C, Matrix D) {
                     rowIndex = i;
                 }
             }
-            
+
         }
         // If demand is over delete column
         if (D.getElem(0, columnIndex) <= S.getElem(rowIndex, 0)) {
@@ -616,16 +619,17 @@ double vogel(Matrix S, Matrix C, Matrix D) {
         }
     }
     cout << ans;
-    cout << "Total distribution cost: " << result;
+    cout << "Total distribution cost: " << result << "\n\n";
     return result;
 }
 
 // Function that implements Russel's method
 double russel(Matrix s, Matrix c, Matrix d) {
+    Matrix ans(c.getN(), c.getM());
     vector<double> u(s.getN());
     vector<double> v(d.getM());
     double result = 0;
-    cout << "Russel's method approximation:\nBasic variables vector:";
+    cout << "Russel's method approximation:\nInitial solution matrix: \n";
 
     // The cycle stops when there are no rows or columns left
     while (true) {
@@ -639,13 +643,12 @@ double russel(Matrix s, Matrix c, Matrix d) {
                 v[j] = max(v[j], c.getElem(i, j));
             }
         }
-
         // Finding the proper delta to consider
         double delta = -1;
         int deltaI = -1, deltaJ = -1;
         for (int i = 0; i < s.getN(); i++) {
             for (int j = 0; j < d.getM(); j++) {
-                if (u[i] < 0 || v[i] < 0) {
+                if (u[i] < 0 || v[j] < 0) {
                     continue;
                 }
                 double tmp = c.getElem(i, j) - (u[i] + v[j]);
@@ -661,24 +664,29 @@ double russel(Matrix s, Matrix c, Matrix d) {
         if (delta == -1) {
             break;
         }
-        cout << "(" << deltaI << ", " << deltaJ << "); ";
 
         // If the demand is higher or equal to the supply 
         if (d.getElem(0, deltaJ) >= s.getElem(deltaI, 0)) {
             result += c.getElem(deltaI, deltaJ) * s.getElem(deltaI, 0);
+            ans.setElem(deltaI, deltaJ, s.getElem(deltaI, 0));
+            d.setElem(0, deltaJ, d.getElem(0, deltaJ) - s.getElem(deltaI, 0));
             for (int j = 0; j < d.getM(); j++) {
                 c.setElem(deltaI, j, -1);
             }
         }
+
         // If the supply is higher than the demand
         else {
             result += c.getElem(deltaI, deltaJ) * d.getElem(0, deltaJ);
+            ans.setElem(deltaI, deltaJ, d.getElem(0, deltaJ));
+            s.setElem(deltaI, 0, s.getElem(deltaI, 0) - d.getElem(0, deltaJ));
             for (int i = 0; i < s.getN(); i++) {
                 c.setElem(i, deltaJ, -1);
             }
         }
     }
-    cout << "\nSolution: " << result << "\n";
+    cout << ans;
+    cout << "Total distribution cost: " << result;
     return result;
 }
 
@@ -690,6 +698,7 @@ int main() {
         Matrix s(1, n), c(n, m), d(1, m);
         cin >> s >> c >> d;
         s = s.transpose();
+        cout << "\n";
         validityCheck(s, d);
         northWest(s, c, d);
         vogel(s, c, d);
