@@ -694,9 +694,15 @@ double russel(Matrix s, Matrix c, Matrix d) {
 int main() {
     try {
         int n, m;
+        cout << "Input the number of souces and destinations:\n";
         cin >> n >> m;
         Matrix s(1, n), c(n, m), d(1, m);
-        cin >> s >> c >> d;
+        cout << "Input the row of supply values:\n";
+        cin >> s;
+        cout << "Input the cost matrix:\n";
+        cin >> c;
+        cout << "Input the row of demand values:\n";
+        cin >> d;
         s = s.transpose();
         cout << "\n";
         validityCheck(s, d);
@@ -711,13 +717,28 @@ int main() {
 
 
 /*
-Input example:
+Input examples from the report:
+
+3 4
+100 80 60
+6 1 4 5
+2 7 1 10
+7 4 8 1
+40 30 120 50
 
 
-3 5
-140 180 160
-2 3 4 2 4
-8 4 1 4 1
-9 7 3 7 2
-60 70 120 130 100
+3 4
+30 40 130
+12 2 9 4
+6 5 3 11
+1 7 4 8
+100 25 34 41
+
+
+3 4
+130 23 62
+4 1 15 4
+9 8 3 11
+2 4 7 5
+30 40 60 85
 */
