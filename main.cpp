@@ -321,6 +321,59 @@ public:
 };
 
 
+// class that simplifies output
+class ConjugateMatrices {
+protected:
+    Matrix* m1;
+    Matrix* m2;
+public:
+    int roundValue = 1e6;
+    friend ostream& operator<<(ostream& os, const ConjugateMatrices& matrices) {
+        string output = "";
+        for (int i = 0; i < matrices.m1->getN(); i++) {
+            for (int j = 0; j < matrices.m1->getM(); j++) {
+                string num = to_string(round(matrices.m1->getElem(i, j) * 100) / 100);
+                for (int k = 0; k < num.size(); k++) {
+                    output += num[k];
+                    if (num[k] == '.') {
+                        for (int f = 0; f < log10(matrices.roundValue); f++) {
+                            output += num[k + f + 1];
+                        }
+                        break;
+                    }
+                }
+                output += " ";
+            }
+            for (int j = 0; j < matrices.m2->getM(); j++) {
+                string num = to_string(round(matrices.m2->getElem(i, j) * 100) / 100);
+                for (int k = 0; k < num.size(); k++) {
+                    output += num[k];
+                    if (num[k] == '.') {
+                        for (int f = 0; f < log10(matrices.roundValue); f++) {
+                            output += num[k + f + 1];
+                        }
+                        break;
+                    }
+                }
+                if (j < matrices.m2->getM() - 1) {
+                    output += " ";
+                }
+            }
+            output += "\n";
+        }
+        return os << output;
+    }
+    ConjugateMatrices() = delete;
+    ConjugateMatrices(Matrix* m1, Matrix* m2) {
+        if (m1->getN() != m2->getN()) {
+            throw invalid_argument("Error: the dimensional problem occurred\n");
+        }
+        this->m1 = m1;
+        this->m2 = m2;
+    }
+};
+
+
 class DiagonalMatrix : public Matrix {
 public:
     DiagonalMatrix() = delete;
@@ -704,7 +757,9 @@ int main() {
         cout << "Input the row of demand values:\n";
         cin >> d;
         s = s.transpose();
-        cout << "\n";
+        cout << "\nThe input parameter table:\n";
+        ConjugateMatrices out(&c, &s);
+        cout << out << d << "\n";
         validityCheck(s, d);
         northWest(s, c, d);
         vogel(s, c, d);
